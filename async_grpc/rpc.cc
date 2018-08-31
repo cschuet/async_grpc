@@ -53,23 +53,18 @@ void Rpc::InternalRpcEvent::Handle() {
 }
 
 Rpc::Rpc(int method_index,
-         ::grpc::ServerCompletionQueue* server_completion_queue,
-         EventQueue* event_queue, ExecutionContext* execution_context,
-         const RpcHandlerInfo& rpc_handler_info, Service* service,
+         ::grpc::ServerCompletionQueue *server_completion_queue,
+         EventQueue *event_queue, ExecutionContext *execution_context,
+         const RpcHandlerInfo &rpc_handler_info, Service *service,
          WeakPtrFactory weak_ptr_factory)
     : method_index_(method_index),
       server_completion_queue_(server_completion_queue),
-      event_queue_(event_queue),
-      execution_context_(execution_context),
-      rpc_handler_info_(rpc_handler_info),
-      service_(service),
+      event_queue_(event_queue), execution_context_(execution_context),
+      rpc_handler_info_(rpc_handler_info), service_(service),
       weak_ptr_factory_(weak_ptr_factory),
       new_connection_event_(Event::NEW_CONNECTION, this),
-      read_event_(Event::READ, this),
-      write_event_(Event::WRITE, this),
-      finish_event_(Event::FINISH, this),
-      done_event_(Event::DONE, this),
-      handler_(rpc_handler_info_.rpc_handler_factory(this, execution_context)) {
+      read_event_(Event::READ, this), write_event_(Event::WRITE, this),
+      finish_event_(Event::FINISH, this), done_event_(Event::DONE, this) {
   InitializeReadersAndWriters(rpc_handler_info_.rpc_type);
 
   // Initialize the prototypical request and response messages.
@@ -85,6 +80,16 @@ std::unique_ptr<Rpc> Rpc::Clone() {
   return common::make_unique<Rpc>(
       method_index_, server_completion_queue_, event_queue_, execution_context_,
       rpc_handler_info_, service_, weak_ptr_factory_);
+}
+
+void Rpc::OnConnection() {
+  if (!handler_) {
+    // Instantiate the handler.
+    handler_ = rpc_handler_info_.rpc_handler_factory(this, execution_context_);
+  }
+
+  // For request-streaming RPCs ask the client to start sending requests.
+  RequestStreamingReadIfNeeded();
 }
 
 void Rpc::OnRequest() { handler_->OnRequestInternal(request_.get()); }
