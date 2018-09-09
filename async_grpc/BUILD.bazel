@@ -72,6 +72,30 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "async_grpc",
+    srcs = glob(
+        [
+            "**/*.cc",
+        ],
+        exclude = [
+            "**/*_test.cc",
+        ],
+    ),
+    hdrs = glob([
+        "**/*.h",
+    ]),
+    copts = ["-Wno-sign-compare"],
+    includes = ["."],
+    defines = ["BUILD_TRACING=0"],
+    deps = [
+        ":cc_protos",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_google_glog//:glog",
+        "@com_google_protobuf//:cc_wkt_protos",
+    ],
+)
+
 [cc_test(
     name = src.replace("/", "_").replace(".cc", ""),
     size = "small",
