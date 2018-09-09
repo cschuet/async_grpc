@@ -73,7 +73,7 @@ cc_library(
 )
 
 cc_library(
-    name = "async_grpc",
+    name = "async_grpc_no_tracing",
     srcs = glob(
         [
             "**/*.cc",
