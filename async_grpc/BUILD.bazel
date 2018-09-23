@@ -18,11 +18,46 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
+
+cc_library(
+  name = "test_server",
+  srcs = ["test_server.cc"],
+  hdrs = ["test_server.h"],
+  deps = [
+  ":cc_protos",
+  ":async_grpc",
+  ],
+)
+
+cc_binary(
+  name = "test_server_main",
+  srcs = ["test_server_main.cc"],
+  deps = [
+  ":cc_protos",
+      ":test_server",
+            "@com_google_glog//:glog",
+     "@com_github_gflags_gflags//:gflags",
+     "@com_github_grpc_grpc//:grpc++_reflection",
+  ],
+)
+
+cc_binary(
+  name = "stress_client",
+  srcs = ["stress_client.cc"],
+  deps = [
+  ":cc_protos",
+      ":test_server",
+            "@com_google_glog//:glog",
+     "@com_github_gflags_gflags//:gflags",
+     "@com_github_grpc_grpc//:grpc++_reflection",
+  ],
+)
+
 proto_library(
     name = "protos",
     srcs = glob(
         [
-            "**/*.proto",
+            "proto/**/*.proto",
         ],
     ),
     deps = [
@@ -63,7 +98,8 @@ cc_library(
     includes = ["."],
     defines = ["BUILD_TRACING=0"],
     deps = [
-        ":cc_protos",
+            ":cc_protos",
+    
         "@com_github_grpc_grpc//:grpc++",
         "@com_google_glog//:glog",
         "@com_google_protobuf//:cc_wkt_protos",

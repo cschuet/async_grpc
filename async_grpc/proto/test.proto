@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package proto;
+
+message Request {
+  int32 input = 1;
+}
+
+message Response {
+  int32 output = 2;
+}
+
+service Test {
+  rpc Echo(Request) returns (Response);
+}
